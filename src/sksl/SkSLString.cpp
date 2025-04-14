@@ -56,6 +56,9 @@ std::string skstd::to_string(double value) {
 }
 
 bool SkSL::stod(std::string_view s, SKSL_FLOAT* value) {
+    if (s.empty()) {
+        return false;
+    }
     std::string str(s.data(), s.size());
     std::stringstream buffer(str);
     buffer.imbue(std::locale::classic());
