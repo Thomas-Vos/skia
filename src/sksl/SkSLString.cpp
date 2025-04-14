@@ -56,15 +56,14 @@ std::string skstd::to_string(double value) {
 }
 
 bool SkSL::stod(std::string_view s, SKSL_FLOAT* value) {
-    return false;
-//    if (s.empty()) {
-//        return false;
-//    }
-//    std::string str(s.data(), s.size());
-//    std::stringstream buffer(str);
-//    buffer.imbue(std::locale::classic());
-//    buffer >> *value;
-//    return !buffer.fail() && std::isfinite(*value);
+    if (s.empty()) {
+        return false;
+    }
+    std::string str(s.data(), s.size());
+    std::stringstream buffer(str);
+    buffer.imbue(std::locale::classic());
+    buffer >> *value;
+    return !buffer.fail() && std::isfinite(*value);
 }
 
 bool SkSL::stoi(std::string_view s, SKSL_INT* value) {
