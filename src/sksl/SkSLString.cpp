@@ -21,26 +21,19 @@
 
 template <typename RoundtripType, int kFullPrecision>
 static std::string to_string_impl(RoundtripType value) {
-    std::stringstream buffer;
-    buffer.imbue(std::locale::classic());
-    buffer.precision(7);
-    buffer << value;
-    std::string text = buffer.str();
+    char buffer[64];
+    int len;
 
-    double roundtripped;
-    buffer >> roundtripped;
-    if (value != (RoundtripType)roundtripped && std::isfinite(value)) {
-        buffer.str({});
-        buffer.clear();
-        buffer.precision(kFullPrecision);
-        buffer << value;
-        text = buffer.str();
-        SkASSERTF((buffer >> roundtripped, value == (RoundtripType)roundtripped),
-                  "%.17g -> %s -> %.17g", value, text.c_str(), roundtripped);
+    if constexpr (std::is_same_v<RoundtripType, float>) {
+        len = std::snprintf(buffer, sizeof(buffer), "%.*g", kFullPrecision, value);
+    } else {
+        len = std::snprintf(buffer, sizeof(buffer), "%.*g", kFullPrecision, value);
     }
 
-    // We need to emit a decimal point to distinguish floats from ints.
-    if (!skstd::contains(text, '.') && !skstd::contains(text, 'e')) {
+    std::string text(buffer, len);
+
+    // Ensure it has a decimal point to differentiate from integers
+    if (text.find('.') == std::string::npos && text.find('e') == std::string::npos) {
         text += ".0";
     }
 
