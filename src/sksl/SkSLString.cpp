@@ -56,14 +56,25 @@ std::string skstd::to_string(double value) {
 }
 
 bool SkSL::stod(std::string_view s, SKSL_FLOAT* value) {
-    if (s.empty()) {
+    if (!value || s.empty()) {
         return false;
     }
+
+    // Copy to null-terminated buffer (needed for std::strtof)
     std::string str(s.data(), s.size());
-    std::stringstream buffer(str);
-    buffer.imbue(std::locale::classic());
-    buffer >> *value;
-    return !buffer.fail() && std::isfinite(*value);
+    char* end = nullptr;
+    const char* start = str.c_str();
+
+    // Use std::strtof (C-style, no locale issues)
+    float parsed = std::strtof(start, &end);
+
+    // Check if any characters were parsed and the result is finite
+    if (start == end || !std::isfinite(parsed)) {
+        return false;
+    }
+
+    *value = parsed;
+    return true;
 }
 
 bool SkSL::stoi(std::string_view s, SKSL_INT* value) {
